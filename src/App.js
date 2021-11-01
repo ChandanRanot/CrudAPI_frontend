@@ -1,25 +1,86 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { Component } from "react";
+import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+import "./App.css";
+import "bootstrap/dist/css/bootstrap.css";
+
+import Projects from "./components/projects";
+import * as crudAPI from "./api.js";
+import Students from "./components/students";
+import NavBar from "./components/navbar";
+
+class App extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      projects: [],
+      students: [],
+      showModal: false,
+      modalValue: "",
+      projId: "",
+    };
+  }
+  handleModal = () => {
+    this.setState({ showModal: !this.state.showModal });
+  };
+  onChangeInput = (event) => {
+    this.setState({ modalValue: event.target.value });
+  };
+
+  createNewProject = async () => {
+    const res = await crudAPI.createNewProject(this.state.modalValue);
+    const newProject = await res.json();
+    this.setState({
+      projects: [...this.state.projects, newProject],
+      showModal: !this.state.showModal,
+      modalValue: "",
+    });
+  };
+
+  async fetchProjects() {
+    const res = await crudAPI.getProjects();
+    const projects = await res.json();
+    this.setState({ projects });
+  }
+
+  async getStudents(projId) {
+    const res = await crudAPI.fetchStudents(projId);
+    const students = await res.json();
+    this.setState({ students, projId });
+  }
+
+  componentDidMount() {
+    this.fetchProjects();
+  }
+  render() {
+    return (
+      <React.Fragment>
+        <Router>
+          <NavBar />
+          <main className="d-flex">
+            <Switch>
+              <Route path="/" exact>
+                <Projects
+                  projects={this.state.projects}
+                  getStudents={(projId) => this.getStudents(projId)}
+                  handleModal={this.handleModal}
+                  showModal={this.state.showModal}
+                  modalValue={this.state.modalValue}
+                  onChangeInput={this.onChangeInput}
+                  createNewProject={this.createNewProject}
+                />
+              </Route>
+              <Route path={`/projects/${this.state.projId}`}>
+                <div className="d-flex">
+                  <Students students={this.state.students} />
+                </div>
+              </Route>
+            </Switch>
+          </main>
+        </Router>
+      </React.Fragment>
+    );
+  }
 }
 
 export default App;
