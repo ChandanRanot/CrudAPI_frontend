@@ -8,6 +8,7 @@ import Projects from "./components/projects";
 import * as crudAPI from "./api.js";
 import Students from "./components/students";
 import NavBar from "./components/navbar";
+import AddStudent from "./components/addStudent";
 
 class App extends Component {
   constructor(props) {
@@ -49,6 +50,12 @@ class App extends Component {
     this.setState({ students, projId });
   }
 
+  addStudent = async (name, email, age, dob, projId) => {
+    const res = await crudAPI.addNewStudent(name, email, age, dob, projId);
+    const newStudent = await res.json();
+    this.setState({ students: [...this.state.students, newStudent] });
+  };
+
   componentDidMount() {
     this.fetchProjects();
   }
@@ -73,6 +80,12 @@ class App extends Component {
               <Route path={`/projects/${this.state.projId}`}>
                 <div className="d-flex">
                   <Students students={this.state.students} />
+                  <AddStudent
+                    projectId={this.state.projId}
+                    addNewStudent={(name, email, age, dob, projId) =>
+                      this.addStudent(name, email, age, dob, projId)
+                    }
+                  />
                 </div>
               </Route>
             </Switch>

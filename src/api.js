@@ -22,3 +22,21 @@ export function fetchStudents(projectId) {
   );
   return response;
 }
+
+export function addNewStudent(name, email, age, dob, projId) {
+  const response = fetch("https://chandan-api.herokuapp.com/students", {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      name: name,
+      email: email,
+      age: age,
+      dob: dob,
+      projectId: projId,
+    }),
+  });
+  return response;
+}
